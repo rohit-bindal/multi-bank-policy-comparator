@@ -11,21 +11,21 @@ export default function TabNavigation({ activeTab, setActiveTab }: TabNavigation
   ];
 
   return (
-    <div className="flex justify-center mb-8">
+    <div className="flex justify-center mb-6">
       <div className="bg-gray-200 rounded-lg p-1 flex">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-8 py-3 rounded-md font-medium transition-all ${
-              activeTab === tab.id
-                ? "bg-yellow-400 text-black shadow-md"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+         {tabs.map((tab) => (
+           <button
+             key={tab.id}
+             onClick={() => setActiveTab(tab.id)}
+             className={`px-6 py-2 rounded-md font-medium transition-all duration-200 text-sm ${
+               activeTab === tab.id
+                 ? "bg-yellow-400 text-black shadow-md"
+                 : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+             }`}
+           >
+             {tab.label}
+           </button>
+         ))}
       </div>
     </div>
   );

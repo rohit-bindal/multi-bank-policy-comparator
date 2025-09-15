@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import FileUploadArea from "./FileUploadArea";
 import SelectedFilesList from "./SelectedFilesList";
-import UploadButton from "./UploadButton";
 import { storageService, StoredFile, BankInfo } from "../services/storageService";
 
 interface PDFProcessResult {
@@ -105,23 +104,20 @@ export default function UploadPolicySection({ onUploadComplete }: UploadPolicySe
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+    <div className="w-full h-full flex flex-col justify-center">
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-2">
           Upload Bank Policy Documents
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm">
           Upload PDF documents to extract bank information and fees using AI
         </p>
       </div>
       
-      <FileUploadArea onFileSelect={handleFileSelect} />
-      <SelectedFilesList files={selectedFiles} />
-      <UploadButton 
-        onUpload={handleUpload}
-        fileCount={selectedFiles.length}
-        uploading={uploading}
-      />
+      <div className="flex-1 flex flex-col justify-center space-y-4">
+        <FileUploadArea onFileSelect={handleFileSelect} />
+        <SelectedFilesList files={selectedFiles} />
+      </div>
     </div>
   );
 }
