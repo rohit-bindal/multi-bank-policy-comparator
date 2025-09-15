@@ -16,7 +16,14 @@ export default function UploadButton({ onUpload, fileCount, uploading }: UploadB
             : "bg-yellow-400 text-black hover:bg-yellow-500 shadow-md"
         }`}
       >
-        {uploading ? "Processing..." : `Upload ${fileCount} Files`}
+        {uploading ? (
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+            <span>Uploading...</span>
+          </div>
+        ) : (
+          `Upload ${fileCount} Files`
+        )}
       </button>
     </div>
   );

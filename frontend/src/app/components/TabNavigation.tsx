@@ -5,8 +5,8 @@ interface TabNavigationProps {
 
 export default function TabNavigation({ activeTab, setActiveTab }: TabNavigationProps) {
   const tabs = [
-    { id: "upload", label: "Upload Policies" },
-    { id: "banks", label: "Banks Added" },
+    { id: "upload", label: "Upload Policy" },
+    { id: "added", label: "Added Policies" },
     { id: "comparator", label: "Comparator" }
   ];
 
