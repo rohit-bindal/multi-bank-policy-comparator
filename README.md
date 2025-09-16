@@ -46,7 +46,7 @@ Backend API: http://localhost:8000
 ```
 
 ### 4. Usage Flow
-1. **Upload PDFs**: Drag & drop home loan MITC documents
+1. **Upload PDFs**: Click to browse and select home loan MITC documents
 2. **AI Processing**: Documents are analyzed and normalized
 3. **Compare Banks**: Select 2+ banks for side-by-side comparison
 4. **View Evidence**: Click cells to see source page numbers and snippets

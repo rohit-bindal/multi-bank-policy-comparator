@@ -20,12 +20,11 @@ export default function FileUploadArea({ onFileSelect }: FileUploadAreaProps) {
         <div className="mb-4">
           <label htmlFor="file-upload" className="cursor-pointer">
             <div className="font-semibold text-gray-800 mb-1">
-              Drop your documents here
+              Select your documents
             </div>
             <div className="text-sm text-gray-600">
-              or{' '}
               <span className="text-yellow-600 font-medium hover:text-yellow-700 underline underline-offset-2 transition-colors">
-                browse to upload
+                Click to browse and upload
               </span>
             </div>
           </label>
