@@ -43,11 +43,39 @@ async def process_pdf_with_retry(pdf_content: bytes, filename: str, max_retries:
             - Verify it's an official bank policy document (not marketing material, application forms, or unrelated documents)
             - If invalid, set is_valid_home_loan_mitc=false and provide validation_reason explaining why
 
+            **NORMALIZATION RULES (CRITICAL - APPLY TO ALL EXTRACTED CONTENT):**
+            When extracting and summarizing information, normalize units, currency, and terminology:
+
+            **Currency & Units:**
+            - Convert ₹/Rs/Rs./Rupees → "INR"
+            - Convert L/Lac/Lakh → "Lakh" (standardize to "Lakh")
+            - Convert Cr/Crore → "Crore" (standardize to "Crore")
+            - Keep percentages as % but ensure consistent format (e.g., "2.5%" not "2.5 percent")
+            - Standardize amounts: "INR 5 Lakh", "INR 2.5 Crore", "0.5%"
+
+            **Terminology Standardization:**
+            - Credit score/CIBIL score/Credit rating → "Credit Score"
+            - Pre-closure/Foreclosure/Early closure/Prepayment → "Prepayment"
+            - Tenure/Term/Loan period/Repayment period → "Tenure"
+            - Processing fee/Administrative fee/Handling charges → "Processing Fee"
+            - Part payment/Partial prepayment → "Partial Prepayment"
+            - ROI/Interest rate/Rate of interest → "Interest Rate"
+            - EMI/Installment/Monthly payment → "EMI"
+            - Loan amount/Principal/Loan quantum → "Loan Amount"
+            - Income proof/Salary certificate/Income documents → "Income Proof"
+
+            **Format Consistency:**
+            - Use consistent date formats when mentioning policy dates
+            - Standardize ranges: "INR 25 Lakh to INR 5 Crore" (not "25L-5Cr")
+            - Use standard percentage format: "up to 80% LTV" (not "upto 80 percent LTV")
+            - Standardize tenure format: "up to 30 years" (not "upto 30 yrs")
+
             **CHAIN OF THOUGHT APPROACH:**
             For each field below, follow this reasoning:
             1. First, search thoroughly through the document for relevant information
-            2. If you find relevant information: set missing=false, provide content and evidence
+            2. If you find relevant information: set missing=false, provide normalized content and evidence
             3. If you don't find information: set missing=true, leave content and evidence as null/empty
+            4. ALWAYS apply normalization rules to the content field before finalizing
 
             **FIELDS TO EXTRACT:**
 
@@ -57,19 +85,28 @@ async def process_pdf_with_retry(pdf_content: bytes, filename: str, max_retries:
                - is_valid_home_loan_mitc: true/false based on whether this is a valid home loan MITC document
                - validation_reason: explanation if invalid (e.g., "This appears to be a credit card terms document", "This is a marketing brochure, not MITC", "Document is not related to home loans")
             
-            2. **Fees and Charges**: All fees, charges, processing fees, administrative costs, penalties, etc.
+            3. **Policy Dates (CRITICAL - LOOK FOR THESE FIRST)**: 
+               Search for policy dates in this priority order:
+               - effective_date: Look for "effective from", "effective date", "comes into effect", "applicable from", "valid from"
+               - updated_date: Look for "updated on", "revised on", "modified on", "last updated", "version date"
+               - Convert dates to ISO format: YYYY-MM-DD (assume Asia/Kolkata timezone)
+               - date_source: Indicate which date was found ("effective_date", "updated_date", or "not_found")
+               - Examples: "15th March 2024" → "2024-03-15", "1st April 2025" → "2025-04-01"
+               - If multiple dates found, prefer effective_date over updated_date
             
-            3. **Prepayment**: Terms for prepayment, prepayment penalties, conditions, minimum amounts, etc.
+            4. **Fees and Charges**: All fees, charges, processing fees, administrative costs, penalties, etc.
             
-            4. **LTV Bands**: Loan to Value ratio bands, different LTV categories, associated rates or terms
+            5. **Prepayment**: Terms for prepayment, prepayment penalties, conditions, minimum amounts, etc.
             
-            5. **Eligibility**: Eligibility criteria for loans, income requirements, employment criteria, etc.
+            6. **LTV Bands**: Loan to Value ratio bands, different LTV categories, associated rates or terms
             
-            6. **Tenure**: Loan tenure options, minimum and maximum tenure, repayment periods
+            7. **Eligibility**: Eligibility criteria for loans, income requirements, employment criteria, etc.
             
-            7. **Interest Reset**: Interest rate reset frequency, floating rate terms, rate review periods
+            8. **Tenure**: Loan tenure options, minimum and maximum tenure, repayment periods
             
-            8. **Documents Required**: List of required documents for loan application, KYC documents, etc.
+            9. **Interest Reset**: Interest rate reset frequency, floating rate terms, rate review periods
+            
+            10. **Documents Required**: List of required documents for loan application, KYC documents, etc.
 
             **RESPONSE FORMAT:**
             For each field:
@@ -229,18 +266,24 @@ async def compare_banks(request: BankComparisonRequest):
 
         Banks to compare: {', '.join(bank_names)}
 
+        **NORMALIZATION FOR COMPARISON (APPLY FIRST):**
+        Before comparing, mentally normalize all units and terminology:
+        - Currency: ₹/Rs/Rs./Rupees → INR, L/Lac/Lakh → Lakh, Cr/Crore → Crore
+        - Terms: Credit score/CIBIL → Credit Score, Pre-closure/Foreclosure → Prepayment, etc.
+        - Formats: Standardize ranges, percentages, and amounts for accurate comparison
+
         **COMPARISON LOGIC:**
         For each field (fees_and_charges, prepayment, ltv_bands, eligibility, tenure, interest_reset, documents_required), 
         compare across all banks and assign one of these statuses:
 
-        1. **SAME**: Information is semantically equivalent across banks (even if worded differently)
-        2. **DIFF**: Information is clearly different between banks
+        1. **SAME**: Information is semantically equivalent across banks (even if worded differently or using different units)
+        2. **DIFF**: Information is clearly different between banks (after normalization)
         3. **MISSING**: Information is not available in this specific bank (missing=true)
         4. **SUSPECT**: Information contains issues like:
            - Conflicting information within the same bank's data
            - Overlapping/contradictory ranges or thresholds
            - Ambiguous language that could be interpreted multiple ways
-           - Inconsistent units or formats
+           - Inconsistent units or formats that couldn't be normalized
            - Incomplete conditions or missing qualifying criteria
 
         **BANK DATA:**
@@ -257,9 +300,11 @@ async def compare_banks(request: BankComparisonRequest):
 
         **IMPORTANT:**
         - SUSPECT is critical - flag any contradictory, ambiguous, or incomplete information
-        - SAME means semantically equivalent (not exact text match)
-        - Compare based on the content field for each bank
+        - SAME means semantically equivalent after normalization (not exact text match)
+        - Apply normalization rules before comparison: "INR 5 Lakh" = "Rs 5 L" = "5 Lac"
+        - Compare based on normalized content for each bank
         - If a field is missing in one bank (missing=true), that specific cell should be MISSING
+        - Consider "Prepayment penalty 2%" and "Foreclosure charge 2%" as SAME after normalization
         """
         
         logger.info("Sending comparison request to Gemini API")

@@ -17,6 +17,9 @@ class BankInfo(BaseModel):
     bank_name: str = Field(description="Short form name of the bank (e.g., ICICI, HDFC, SBI, DBS)")
     is_valid_home_loan_mitc: bool = Field(description="True if this is a valid home loan MITC document, False otherwise")
     validation_reason: Optional[str] = Field(default=None, description="Reason why document is invalid (only if is_valid_home_loan_mitc is False)")
+    effective_date: Optional[str] = Field(default=None, description="Policy effective date in ISO format (Asia/Kolkata timezone) if found in document")
+    updated_date: Optional[str] = Field(default=None, description="Policy updated/revised date in ISO format (Asia/Kolkata timezone) if found in document")
+    date_source: Optional[str] = Field(default=None, description="Source of the date (e.g., 'effective_date', 'updated_date', 'not_found')")
     fees_and_charges: FieldWithEvidence = Field(description="All fees and charges information with evidence")
     prepayment: FieldWithEvidence = Field(description="Prepayment terms and conditions with evidence")
     ltv_bands: FieldWithEvidence = Field(description="Loan to Value (LTV) ratio bands with evidence")
@@ -71,7 +74,7 @@ class SummaryCount(BaseModel):
 
 
 class BankComparisonRequest(BaseModel):
-    banks: List[BankComparisonData] = Field(description="List of banks to compare", min_items=2)
+    banks: List[BankComparisonData] = Field(description="List of banks to compare", min_length=2)
 
 
 class BankComparisonResponse(BaseModel):

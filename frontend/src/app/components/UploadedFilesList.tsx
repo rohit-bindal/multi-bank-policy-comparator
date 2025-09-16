@@ -16,6 +16,37 @@ export default function UploadedFilesList({ files, onDeleteFile, onUploadClick }
     });
   };
 
+  const formatPolicyDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getPolicyDateInfo = (file: StoredFile) => {
+    if (!file.bankInfo) return null;
+    
+    // Prefer effective date over updated date
+    if (file.bankInfo.effective_date) {
+      return {
+        date: formatPolicyDate(file.bankInfo.effective_date),
+        label: 'Effective',
+        source: 'effective_date'
+      };
+    }
+    
+    if (file.bankInfo.updated_date) {
+      return {
+        date: formatPolicyDate(file.bankInfo.updated_date),
+        label: 'Updated',
+        source: 'updated_date'
+      };
+    }
+    
+    return null;
+  };
+
   const formatFileSize = (bytes: number) => {
     return (bytes / 1024 / 1024).toFixed(2) + ' MB';
   };
@@ -81,7 +112,17 @@ export default function UploadedFilesList({ files, onDeleteFile, onUploadClick }
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                     <span>{formatFileSize(file.fileSize)}</span>
                     <span>•</span>
-                    <span>{formatDate(file.uploadDate)}</span>
+                    {(() => {
+                      const policyDateInfo = getPolicyDateInfo(file);
+                      if (policyDateInfo) {
+                        return (
+                          <span className="font-medium text-blue-600" title={`Policy ${policyDateInfo.label.toLowerCase()} date`}>
+                            {policyDateInfo.label}: {policyDateInfo.date}
+                          </span>
+                        );
+                      }
+                      return <span title="Upload date">{formatDate(file.uploadDate)}</span>;
+                    })()}
                     {file.bankInfo?.bank_name && file.bankInfo.is_valid_home_loan_mitc && (
                       <>
                         <span>•</span>
