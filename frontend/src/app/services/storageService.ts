@@ -1,6 +1,23 @@
+interface Evidence {
+  page_number?: number;
+  line_snippet: string;
+}
+
+interface FieldWithEvidence {
+  missing: boolean; // True if information not found in document
+  content?: string; // Brief explanation/summary (only if not missing)
+  evidence?: Evidence[]; // Page numbers and line snippets (only if not missing)
+}
+
 interface BankInfo {
   bank_name: string;
-  fees_and_charges: string;
+  fees_and_charges: FieldWithEvidence;
+  prepayment: FieldWithEvidence;
+  ltv_bands: FieldWithEvidence;
+  eligibility: FieldWithEvidence;
+  tenure: FieldWithEvidence;
+  interest_reset: FieldWithEvidence;
+  documents_required: FieldWithEvidence;
 }
 
 interface StoredFile {
@@ -15,6 +32,7 @@ interface StoredFile {
 
 class StorageService {
   private readonly STORAGE_KEY = "multi-bank-files";
+  private readonly COMPARISON_CACHE_KEY = "multi-bank-comparisons";
 
   // Get all stored files
   getStoredFiles(): StoredFile[] {
@@ -94,7 +112,134 @@ class StorageService {
   private generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
+
+  // Comparison Caching Methods
+  private generateComparisonKey(bankIds: string[]): string {
+    // Sort bank IDs to ensure consistent key regardless of selection order
+    return bankIds.sort().join('-');
+  }
+
+  // Save comparison result to cache
+  saveComparisonResult(bankIds: string[], result: BankComparisonResponse): void {
+    if (typeof window === "undefined") return;
+    
+    try {
+      const cacheKey = this.generateComparisonKey(bankIds);
+      const cached = this.getComparisonCache();
+      
+      // Add timestamp for potential expiration in the future
+      cached[cacheKey] = {
+        result,
+        timestamp: Date.now(),
+        bankIds: bankIds.sort()
+      };
+      
+      localStorage.setItem(this.COMPARISON_CACHE_KEY, JSON.stringify(cached));
+    } catch (error) {
+      console.error("Error saving comparison result to cache:", error);
+    }
+  }
+
+  // Get comparison result from cache
+  getCachedComparisonResult(bankIds: string[]): BankComparisonResponse | null {
+    if (typeof window === "undefined") return null;
+    
+    try {
+      const cacheKey = this.generateComparisonKey(bankIds);
+      const cached = this.getComparisonCache();
+      
+      if (cached[cacheKey]) {
+        return cached[cacheKey].result;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error reading comparison result from cache:", error);
+      return null;
+    }
+  }
+
+  // Get all cached comparisons
+  private getComparisonCache(): Record<string, {
+    result: BankComparisonResponse;
+    timestamp: number;
+    bankIds: string[];
+  }> {
+    if (typeof window === "undefined") return {};
+    
+    try {
+      const cached = localStorage.getItem(this.COMPARISON_CACHE_KEY);
+      return cached ? JSON.parse(cached) : {};
+    } catch (error) {
+      console.error("Error reading comparison cache:", error);
+      return {};
+    }
+  }
+
+  // Clear comparison cache
+  clearComparisonCache(): void {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(this.COMPARISON_CACHE_KEY);
+    }
+  }
+
+  // Check if comparison result is cached
+  isComparisonCached(bankIds: string[]): boolean {
+    const cacheKey = this.generateComparisonKey(bankIds);
+    const cached = this.getComparisonCache();
+    return !!cached[cacheKey];
+  }
+
+  // Get all cached comparison keys (for debugging/management)
+  getCachedComparisonKeys(): string[] {
+    const cached = this.getComparisonCache();
+    return Object.keys(cached);
+  }
+}
+
+// Comparison interfaces
+interface BankComparisonData {
+  bank_id: string;
+  bank_info: BankInfo;
+}
+
+interface BankComparisonCell {
+  bank_id: string;
+  bank_name: string;
+  status: 'SAME' | 'DIFF' | 'MISSING' | 'SUSPECT';
+  explanation: string;
+  details?: string;
+}
+
+interface ComparisonRow {
+  field_name: string;
+  bank_results: BankComparisonCell[];
+}
+
+interface SummaryCount {
+  status: string;
+  count: number;
+}
+
+interface BankComparisonRequest {
+  banks: BankComparisonData[];
+}
+
+interface BankComparisonResponse {
+  comparison_table: ComparisonRow[];
+  summary: SummaryCount[];
 }
 
 export const storageService = new StorageService();
-export type { StoredFile, BankInfo };
+export type { 
+  StoredFile, 
+  BankInfo, 
+  FieldWithEvidence, 
+  Evidence,
+  BankComparisonData,
+  BankComparisonCell,
+  ComparisonRow,
+  SummaryCount,
+  BankComparisonRequest,
+  BankComparisonResponse
+};

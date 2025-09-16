@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import UploadedFilesList from "./UploadedFilesList";
-import FilePreviewModal from "./FilePreviewModal";
 import { storageService, StoredFile } from "../services/storageService";
 
 interface AddedPoliciesSectionProps {
@@ -11,8 +10,6 @@ interface AddedPoliciesSectionProps {
 
 export default function AddedPoliciesSection({ onUploadClick }: AddedPoliciesSectionProps) {
   const [storedFiles, setStoredFiles] = useState<StoredFile[]>([]);
-  const [previewFile, setPreviewFile] = useState<StoredFile | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
 
   // Load stored files on component mount and set up refresh interval
   useEffect(() => {
@@ -27,11 +24,6 @@ export default function AddedPoliciesSection({ onUploadClick }: AddedPoliciesSec
     
     return () => clearInterval(interval);
   }, []);
-
-  const handleFileClick = (file: StoredFile) => {
-    setPreviewFile(file);
-    setShowPreview(true);
-  };
 
   const handleDeleteFile = (id: string) => {
     storageService.deleteFile(id);
@@ -92,19 +84,11 @@ export default function AddedPoliciesSection({ onUploadClick }: AddedPoliciesSec
         <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-y-auto">
           <UploadedFilesList 
             files={storedFiles}
-            onFileClick={handleFileClick}
             onDeleteFile={handleDeleteFile}
             onUploadClick={onUploadClick}
           />
         </div>
       </div>
-
-      {/* File Preview Modal */}
-      <FilePreviewModal 
-        isOpen={showPreview}
-        file={previewFile}
-        onClose={() => setShowPreview(false)}
-      />
     </>
   );
 }

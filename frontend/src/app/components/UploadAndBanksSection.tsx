@@ -5,7 +5,6 @@ import FileUploadArea from "./FileUploadArea";
 import SelectedFilesList from "./SelectedFilesList";
 import UploadButton from "./UploadButton";
 import UploadedFilesList from "./UploadedFilesList";
-import FilePreviewModal from "./FilePreviewModal";
 import { storageService, StoredFile, BankInfo } from "../services/storageService";
 
 interface PDFProcessResult {
@@ -26,8 +25,6 @@ export default function UploadAndBanksSection() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [storedFiles, setStoredFiles] = useState<StoredFile[]>([]);
-  const [previewFile, setPreviewFile] = useState<StoredFile | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
 
   // Load stored files on component mount
   useEffect(() => {
@@ -106,11 +103,6 @@ export default function UploadAndBanksSection() {
     }
   };
 
-  const handleFileClick = (file: StoredFile) => {
-    setPreviewFile(file);
-    setShowPreview(true);
-  };
-
   const handleDeleteFile = (id: string) => {
     storageService.deleteFile(id);
     setStoredFiles(storageService.getStoredFiles());
@@ -146,26 +138,18 @@ export default function UploadAndBanksSection() {
               Your Bank Files
             </h2>
             <p className="text-gray-600 mb-6">
-              Click on any file to view detailed analysis results
+              View and manage all your uploaded bank policy documents
             </p>
           </div>
           
           <div className="border rounded-lg p-4 bg-gray-50 min-h-[400px]">
             <UploadedFilesList 
               files={storedFiles}
-              onFileClick={handleFileClick}
               onDeleteFile={handleDeleteFile}
             />
           </div>
         </div>
       </div>
-
-      {/* File Preview Modal */}
-      <FilePreviewModal 
-        isOpen={showPreview}
-        file={previewFile}
-        onClose={() => setShowPreview(false)}
-      />
     </>
   );
 }

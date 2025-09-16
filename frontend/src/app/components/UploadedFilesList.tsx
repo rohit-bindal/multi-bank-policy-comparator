@@ -2,12 +2,11 @@ import { StoredFile } from "../services/storageService";
 
 interface UploadedFilesListProps {
   files: StoredFile[];
-  onFileClick: (file: StoredFile) => void;
   onDeleteFile: (id: string) => void;
   onUploadClick?: () => void;
 }
 
-export default function UploadedFilesList({ files, onFileClick, onDeleteFile, onUploadClick }: UploadedFilesListProps) {
+export default function UploadedFilesList({ files, onDeleteFile, onUploadClick }: UploadedFilesListProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -61,8 +60,7 @@ export default function UploadedFilesList({ files, onFileClick, onDeleteFile, on
         {files.map((file) => (
           <div
             key={file.id}
-            className="border rounded-lg p-3 hover:bg-gray-50 transition-colors cursor-pointer group"
-            onClick={() => onFileClick(file)}
+            className="border rounded-lg p-3 hover:bg-gray-50 transition-colors group"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3 flex-1 min-w-0">
