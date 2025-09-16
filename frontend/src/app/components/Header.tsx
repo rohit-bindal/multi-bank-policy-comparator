@@ -5,7 +5,7 @@ export default function Header() {
         Choose Right, Choose Smart
       </h1>
       <p className="text-gray-600 max-w-2xl mx-auto">
-        Take control of your banking journey with our powerful tools. Whether you're comparing policies 
+        Take control of your banking journey with our powerful tools. Whether you&apos;re comparing policies 
         or exploring different bank offerings.
       </p>
     </div>

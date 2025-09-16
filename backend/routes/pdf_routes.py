@@ -36,6 +36,13 @@ async def process_pdf_with_retry(pdf_content: bytes, filename: str, max_retries:
             prompt = """
             Analyze this bank policy document and extract the following information with evidence.
 
+            **DOCUMENT VALIDATION (CRITICAL - ANALYZE FIRST):**
+            Before extracting any information, determine if this is a valid home loan MITC (Most Important Terms and Conditions) document:
+            - Check if it contains home loan/housing loan related terms
+            - Look for typical MITC sections like fees, charges, prepayment, LTV, eligibility, tenure
+            - Verify it's an official bank policy document (not marketing material, application forms, or unrelated documents)
+            - If invalid, set is_valid_home_loan_mitc=false and provide validation_reason explaining why
+
             **CHAIN OF THOUGHT APPROACH:**
             For each field below, follow this reasoning:
             1. First, search thoroughly through the document for relevant information
@@ -45,6 +52,10 @@ async def process_pdf_with_retry(pdf_content: bytes, filename: str, max_retries:
             **FIELDS TO EXTRACT:**
 
             1. **Bank Name**: Extract the short form name (e.g., ICICI, HDFC, SBI, DBS, AXIS, etc.)
+            
+            2. **Document Validation**: 
+               - is_valid_home_loan_mitc: true/false based on whether this is a valid home loan MITC document
+               - validation_reason: explanation if invalid (e.g., "This appears to be a credit card terms document", "This is a marketing brochure, not MITC", "Document is not related to home loans")
             
             2. **Fees and Charges**: All fees, charges, processing fees, administrative costs, penalties, etc.
             

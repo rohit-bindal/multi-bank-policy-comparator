@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import EmptyState from "./EmptyState";
 import ComparisonDetailModal from "./ComparisonDetailModal";
 import { 
   storageService, 
   StoredFile, 
   BankComparisonRequest, 
   BankComparisonResponse,
-  ComparisonRow,
   BankComparisonCell,
   FieldWithEvidence
 } from "../services/storageService";
@@ -41,7 +39,9 @@ export default function ComparatorSection({ onUploadClick }: ComparatorSectionPr
     const loadBanks = () => {
       const files = storageService.getStoredFiles();
       const successfulFiles = files.filter(file => 
-        file.status === "success" && file.bankInfo?.bank_name
+        file.status === "success" && 
+        file.bankInfo?.bank_name && 
+        file.bankInfo?.is_valid_home_loan_mitc === true
       );
       setAvailableBanks(successfulFiles);
     };
@@ -271,11 +271,11 @@ export default function ComparatorSection({ onUploadClick }: ComparatorSectionPr
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto" style={{maxHeight: '160px'}}>
                   {availableBanks.map((bank) => (
                     <div
                       key={bank.id}
-                      className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                      className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                       onClick={() => handleBankToggle(bank.id)}
                     >
                       <input
@@ -407,17 +407,17 @@ export default function ComparatorSection({ onUploadClick }: ComparatorSectionPr
             <div className="flex-1 overflow-hidden p-6">
               {!showCellModal ? (
                 /* Comparison Table */
-                <div className="overflow-auto h-full">
+                <div className="overflow-auto h-full border border-gray-300 rounded-lg">
                   <table className="min-w-full border-collapse">
-                    <thead className="bg-gray-50 sticky top-0">
-                      <tr>
-                        <th className="border border-gray-300 px-4 py-3 text-left font-medium text-gray-900 min-w-48">
+                    <thead className="bg-gray-50 sticky top-0 z-10">
+                      <tr className="border-t border-gray-300">
+                        <th className="border-r border-b border-gray-300 px-4 py-3 text-left font-medium text-gray-900 min-w-48 bg-gray-50">
                           Policy Field
                         </th>
                         {availableBanks
                           .filter(bank => selectedBanks.includes(bank.id))
                           .map((bank) => (
-                            <th key={bank.id} className="border border-gray-300 px-4 py-3 text-center font-medium text-gray-900 min-w-32">
+                            <th key={bank.id} className="border-r border-b border-gray-300 px-4 py-3 text-center font-medium text-gray-900 min-w-32 bg-gray-50">
                               {bank.bankInfo?.bank_name}
                             </th>
                           ))}

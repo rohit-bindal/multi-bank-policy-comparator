@@ -11,6 +11,8 @@ interface FieldWithEvidence {
 
 interface BankInfo {
   bank_name: string;
+  is_valid_home_loan_mitc: boolean;
+  validation_reason?: string;
   fees_and_charges: FieldWithEvidence;
   prepayment: FieldWithEvidence;
   ltv_bands: FieldWithEvidence;

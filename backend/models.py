@@ -15,6 +15,8 @@ class FieldWithEvidence(BaseModel):
 
 class BankInfo(BaseModel):
     bank_name: str = Field(description="Short form name of the bank (e.g., ICICI, HDFC, SBI, DBS)")
+    is_valid_home_loan_mitc: bool = Field(description="True if this is a valid home loan MITC document, False otherwise")
+    validation_reason: Optional[str] = Field(default=None, description="Reason why document is invalid (only if is_valid_home_loan_mitc is False)")
     fees_and_charges: FieldWithEvidence = Field(description="All fees and charges information with evidence")
     prepayment: FieldWithEvidence = Field(description="Prepayment terms and conditions with evidence")
     ltv_bands: FieldWithEvidence = Field(description="Loan to Value (LTV) ratio bands with evidence")

@@ -125,7 +125,7 @@ export default function ComparisonDetailModal({
                     )}
                   </div>
                   <p className="text-sm text-gray-700 italic">
-                    "{evidence.line_snippet}"
+                    &ldquo;{evidence.line_snippet}&rdquo;
                   </p>
                 </div>
               ))}

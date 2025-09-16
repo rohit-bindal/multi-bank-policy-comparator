@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import FileUploadArea from "./FileUploadArea";
 import SelectedFilesList from "./SelectedFilesList";
-import { storageService, StoredFile, BankInfo, FieldWithEvidence, Evidence } from "../services/storageService";
+import { storageService, BankInfo } from "../services/storageService";
 
 interface PDFProcessResult {
   filename: string;
@@ -26,7 +26,6 @@ interface UploadPolicySectionProps {
 export default function UploadPolicySection({ onUploadComplete }: UploadPolicySectionProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -62,7 +61,6 @@ export default function UploadPolicySection({ onUploadComplete }: UploadPolicySe
     if (selectedFiles.length === 0) return;
     
     setUploading(true);
-    setUploadSuccess(false);
     
     // Store original files before clearing
     const filesToUpload = [...selectedFiles];
