@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import EmptyState from "./EmptyState";
 import { storageService, StoredFile } from "../services/storageService";
 
-export default function ComparatorSection() {
+interface ComparatorSectionProps {
+  onUploadClick?: () => void;
+}
+
+export default function ComparatorSection({ onUploadClick }: ComparatorSectionProps) {
   const [availableBanks, setAvailableBanks] = useState<StoredFile[]>([]);
   const [selectedBanks, setSelectedBanks] = useState<string[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -70,14 +74,21 @@ export default function ComparatorSection() {
   // Show empty state if no banks are available
   if (availableBanks.length === 0) {
     return (
-      <EmptyState
-        icon={chartIcon}
-        title="No Banks Available"
-        description="Upload and process some bank policy documents first to compare them here."
-        buttonText="Go to Upload"
-        onButtonClick={() => {}}
-        buttonDisabled={false}
-      />
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-center">
+          {chartIcon}
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Banks Available</h2>
+          <p className="text-gray-600">
+            <button 
+              onClick={onUploadClick}
+              className="text-yellow-600 hover:text-yellow-700 underline underline-offset-2 font-medium transition-colors"
+            >
+              Upload
+            </button>
+            {' '}and process some bank policy documents first to compare them here.
+          </p>
+        </div>
+      </div>
     );
   }
 

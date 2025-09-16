@@ -5,7 +5,11 @@ import UploadedFilesList from "./UploadedFilesList";
 import FilePreviewModal from "./FilePreviewModal";
 import { storageService, StoredFile } from "../services/storageService";
 
-export default function AddedPoliciesSection() {
+interface AddedPoliciesSectionProps {
+  onUploadClick?: () => void;
+}
+
+export default function AddedPoliciesSection({ onUploadClick }: AddedPoliciesSectionProps) {
   const [storedFiles, setStoredFiles] = useState<StoredFile[]>([]);
   const [previewFile, setPreviewFile] = useState<StoredFile | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -90,6 +94,7 @@ export default function AddedPoliciesSection() {
             files={storedFiles}
             onFileClick={handleFileClick}
             onDeleteFile={handleDeleteFile}
+            onUploadClick={onUploadClick}
           />
         </div>
       </div>

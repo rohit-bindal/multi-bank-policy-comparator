@@ -41,8 +41,8 @@ export default function Home() {
           {activeTab === "upload" && (
             <UploadPolicySection onUploadComplete={() => handleTabChange("added")} />
           )}
-          {activeTab === "added" && <AddedPoliciesSection />}
-          {activeTab === "comparator" && <ComparatorSection />}
+          {activeTab === "added" && <AddedPoliciesSection onUploadClick={() => handleTabChange("upload")} />}
+          {activeTab === "comparator" && <ComparatorSection onUploadClick={() => handleTabChange("upload")} />}
               </div>
             </div>
           </div>
