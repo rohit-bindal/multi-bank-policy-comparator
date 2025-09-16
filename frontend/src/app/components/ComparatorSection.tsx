@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import ComparisonDetailModal from "./ComparisonDetailModal";
+import { getFieldDisplayNames } from "../config/fields";
 import { 
   storageService, 
   StoredFile, 
@@ -153,15 +154,7 @@ export default function ComparatorSection({ onUploadClick }: ComparatorSectionPr
     }
   };
 
-  const fieldDisplayNames = {
-    'fees_and_charges': 'Fees & Charges',
-    'prepayment': 'Prepayment',
-    'ltv_bands': 'LTV Bands',
-    'eligibility': 'Eligibility',
-    'tenure': 'Tenure',
-    'interest_reset': 'Interest Reset',
-    'documents_required': 'Documents Required'
-  };
+  const fieldDisplayNames = getFieldDisplayNames();
 
   const getFieldData = (bank: StoredFile, fieldName: string): FieldWithEvidence | null => {
     if (!bank.bankInfo) return null;

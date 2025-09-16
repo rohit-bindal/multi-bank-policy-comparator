@@ -1,4 +1,5 @@
 import { StoredFile, FieldWithEvidence } from "../services/storageService";
+import { getFieldDisplayNames } from "../config/fields";
 
 interface ComparisonDetailModalProps {
   isOpen: boolean;
@@ -38,15 +39,7 @@ export default function ComparisonDetailModal({
     }
   };
 
-  const fieldDisplayNames: Record<string, string> = {
-    'fees_and_charges': 'Fees & Charges',
-    'prepayment': 'Prepayment',
-    'ltv_bands': 'LTV Bands',
-    'eligibility': 'Eligibility',
-    'tenure': 'Tenure',
-    'interest_reset': 'Interest Reset',
-    'documents_required': 'Documents Required'
-  };
+  const fieldDisplayNames = getFieldDisplayNames();
 
 
   return (

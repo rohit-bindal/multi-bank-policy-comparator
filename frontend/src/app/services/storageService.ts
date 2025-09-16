@@ -15,7 +15,7 @@ interface BankInfo {
   validation_reason?: string;
   effective_date?: string;
   updated_date?: string;
-  date_source?: string;
+  date_source?: "effective_date" | "updated_date" | "not_found";
   fees_and_charges: FieldWithEvidence;
   prepayment: FieldWithEvidence;
   ltv_bands: FieldWithEvidence;

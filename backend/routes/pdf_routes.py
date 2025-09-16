@@ -9,6 +9,7 @@ from google.genai import types
 from dotenv import load_dotenv
 
 from models import BankInfo, PDFProcessResult, ProcessPDFsResponse, BankComparisonRequest, BankComparisonResponse, ComparisonRow, ComparisonCell
+from config.fields import get_field_config, get_field_keys, get_field_descriptions
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +34,8 @@ async def process_pdf_with_retry(pdf_content: bytes, filename: str, max_retries:
     for attempt in range(max_retries):
         try:
             # Create the comprehensive prompt for structured output
-            prompt = """
-            Analyze this bank policy document and extract the following information with evidence.
+            prompt = f"""
+            Analyze this bank policy document (filename: {filename}) and extract the following information with evidence.
 
             **DOCUMENT VALIDATION (CRITICAL - ANALYZE FIRST):**
             Before extracting any information, determine if this is a valid home loan MITC (Most Important Terms and Conditions) document:
@@ -94,19 +95,18 @@ async def process_pdf_with_retry(pdf_content: bytes, filename: str, max_retries:
                - Examples: "15th March 2024" → "2024-03-15", "1st April 2025" → "2025-04-01"
                - If multiple dates found, prefer effective_date over updated_date
             
-            4. **Fees and Charges**: All fees, charges, processing fees, administrative costs, penalties, etc.
+            """
             
-            5. **Prepayment**: Terms for prepayment, prepayment penalties, conditions, minimum amounts, etc.
+            # Generate dynamic field instructions
+            field_config = get_field_config()
+            field_instructions = ""
+            field_number = 4
+            for field_key, field_info in field_config.items():
+                field_instructions += f"""
+            {field_number}. **{field_info['display_name']}**: {field_info['description']}"""
+                field_number += 1
             
-            6. **LTV Bands**: Loan to Value ratio bands, different LTV categories, associated rates or terms
-            
-            7. **Eligibility**: Eligibility criteria for loans, income requirements, employment criteria, etc.
-            
-            8. **Tenure**: Loan tenure options, minimum and maximum tenure, repayment periods
-            
-            9. **Interest Reset**: Interest rate reset frequency, floating rate terms, rate review periods
-            
-            10. **Documents Required**: List of required documents for loan application, KYC documents, etc.
+            prompt += field_instructions + """
 
             **RESPONSE FORMAT:**
             For each field:
@@ -273,7 +273,7 @@ async def compare_banks(request: BankComparisonRequest):
         - Formats: Standardize ranges, percentages, and amounts for accurate comparison
 
         **COMPARISON LOGIC:**
-        For each field (fees_and_charges, prepayment, ltv_bands, eligibility, tenure, interest_reset, documents_required), 
+        For each field ({', '.join(get_field_keys())}), 
         compare across all banks and assign one of these statuses:
 
         1. **SAME**: Information is semantically equivalent across banks (even if worded differently or using different units)
@@ -290,7 +290,7 @@ async def compare_banks(request: BankComparisonRequest):
         {banks_data}
 
         **INSTRUCTIONS:**
-        1. For each of the 7 fields, compare all banks
+        1. For each of the {len(get_field_keys())} fields, compare all banks
         2. For each bank-field combination, provide:
            - status: SAME/DIFF/MISSING/SUSPECT
            - explanation: Brief reason for the status

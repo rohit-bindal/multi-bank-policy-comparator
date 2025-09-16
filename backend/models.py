@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Literal
 
 
 class Evidence(BaseModel):
@@ -19,7 +19,7 @@ class BankInfo(BaseModel):
     validation_reason: Optional[str] = Field(default=None, description="Reason why document is invalid (only if is_valid_home_loan_mitc is False)")
     effective_date: Optional[str] = Field(default=None, description="Policy effective date in ISO format (Asia/Kolkata timezone) if found in document")
     updated_date: Optional[str] = Field(default=None, description="Policy updated/revised date in ISO format (Asia/Kolkata timezone) if found in document")
-    date_source: Optional[str] = Field(default=None, description="Source of the date (e.g., 'effective_date', 'updated_date', 'not_found')")
+    date_source: Optional[Literal["effective_date", "updated_date", "not_found"]] = Field(default=None, description="Source of the date")
     fees_and_charges: FieldWithEvidence = Field(description="All fees and charges information with evidence")
     prepayment: FieldWithEvidence = Field(description="Prepayment terms and conditions with evidence")
     ltv_bands: FieldWithEvidence = Field(description="Loan to Value (LTV) ratio bands with evidence")
@@ -31,7 +31,7 @@ class BankInfo(BaseModel):
 
 class PDFProcessResult(BaseModel):
     filename: str
-    status: str  # "success" or "failed"
+    status: Literal["success", "failed"] = Field(description="Processing status")
     bank_info: Optional[BankInfo] = None
     error_message: Optional[str] = None
 
@@ -50,7 +50,7 @@ class BankComparisonData(BaseModel):
 
 
 class ComparisonCell(BaseModel):
-    status: str = Field(description="Comparison status: SAME, DIFF, MISSING, or SUSPECT")
+    status: Literal["SAME", "DIFF", "MISSING", "SUSPECT"] = Field(description="Comparison status")
     explanation: str = Field(description="Brief explanation of why this status was assigned")
     details: Optional[str] = Field(default=None, description="Additional details if needed")
 
@@ -58,7 +58,7 @@ class ComparisonCell(BaseModel):
 class BankComparisonCell(BaseModel):
     bank_id: str = Field(description="Unique identifier for the bank")
     bank_name: str = Field(description="Name of the bank")
-    status: str = Field(description="Comparison status: SAME, DIFF, MISSING, or SUSPECT")
+    status: Literal["SAME", "DIFF", "MISSING", "SUSPECT"] = Field(description="Comparison status")
     explanation: str = Field(description="Brief explanation of why this status was assigned")
     details: Optional[str] = Field(default=None, description="Additional details if needed")
 
@@ -69,7 +69,7 @@ class ComparisonRow(BaseModel):
 
 
 class SummaryCount(BaseModel):
-    status: str = Field(description="Status type: SAME, DIFF, MISSING, or SUSPECT")
+    status: Literal["SAME", "DIFF", "MISSING", "SUSPECT"] = Field(description="Status type")
     count: int = Field(description="Number of occurrences of this status")
 
 
